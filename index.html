@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
@@ -132,7 +131,7 @@
               <path d="M12 3v18M5 21h14M3 7l4 8M3 7l-2 4h8L7 7M17 7l4 8M17 7l-2 4h8l-2-4"/>
             </svg>
           </div>
-          <span class="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-gold-400 border-2 border-navy-900"></span>
+          <span class="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-yellow-400 border-2 border-navy-900"></span>
         </div>
         <div>
           <h1 class="text-lg font-bold tracking-tight leading-none">
@@ -302,7 +301,7 @@
           </div>
         </div>
 
-        <button type="submit" id="generateBtn" class="w-full relative overflow-hidden bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.01] group text-sm">
+        <button type="submit" id="generateBtn" class="w-full relative overflow-hidden bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.01] group text-sm disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none">
           <span class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></span>
           <span id="btnContent" class="relative flex items-center justify-center gap-2.5">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -315,6 +314,10 @@
             <span id="loadingText">Drafting your letter…</span>
           </span>
         </button>
+
+        <p class="text-center text-xs text-slate-600">
+          🔑 Set your <code class="text-indigo-400/80 bg-indigo-900/20 px-1 py-0.5 rounded">API_KEY</code> constant in the script before use
+        </p>
       </form>
     </div>
 
@@ -375,7 +378,7 @@
         </div>
       </div>
 
-      <div id="errorPanel" class="hidden glass border border-red-700/40 bg-red-900/10 rounded-2xl p-5 animate-slide-up">
+      <div id="errorPanel" class="hidden glass border border-red-700/40 bg-red-900/10 rounded-2xl p-5">
         <div class="flex items-start gap-3">
           <div class="w-8 h-8 rounded-lg bg-red-700/20 border border-red-600/30 flex items-center justify-center flex-shrink-0 mt-0.5">
             <svg class="w-4 h-4 text-red-400" fill="currentColor" viewBox="0 0 20 20">
@@ -385,6 +388,7 @@
           <div>
             <h4 class="text-sm font-semibold text-red-300 mb-1">Generation Failed</h4>
             <p id="errorMessage" class="text-xs text-red-400/80 leading-relaxed"></p>
+            <p class="text-xs text-slate-500 mt-2">Check your API key and network connection, then try again.</p>
           </div>
         </div>
       </div>
@@ -397,10 +401,20 @@
           <div>
             <p class="text-xs font-semibold text-amber-400/80 mb-1">Important Disclaimer</p>
             <p class="text-xs text-slate-500 leading-relaxed">
-              This tool generates AI-assisted draft letters for informational purposes only. It does <strong>not</strong> constitute legal advice.
+              This tool generates AI-assisted draft letters for informational purposes only. It does <strong>not</strong> constitute legal advice. Always review the letter carefully and consult a qualified attorney for serious legal matters.
             </p>
           </div>
         </div>
+      </div>
+
+      <div class="glass rounded-2xl p-5 border border-navy-700/30">
+        <p class="text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wider">💡 Tips for Best Results</p>
+        <ul class="space-y-2 text-xs text-slate-500">
+          <li class="flex items-start gap-2"><span class="text-indigo-400 mt-0.5">▸</span> Include specific dates, amounts, and reference numbers</li>
+          <li class="flex items-start gap-2"><span class="text-indigo-400 mt-0.5">▸</span> Mention any prior complaints or case numbers</li>
+          <li class="flex items-start gap-2"><span class="text-indigo-400 mt-0.5">▸</span> Edit the letter and add your full name and address before sending</li>
+          <li class="flex items-start gap-2"><span class="text-indigo-400 mt-0.5">▸</span> Send via certified mail or email with read receipt</li>
+        </ul>
       </div>
     </div>
   </main>
@@ -418,44 +432,52 @@
     </div>
   </footer>
 
-  <div id="toast" class="fixed bottom-6 right-6 z-50 hidden animate-slide-up">
+  <div id="toast" class="fixed bottom-6 right-6 z-50 hidden">
     <div class="glass border border-emerald-600/40 bg-emerald-900/20 text-emerald-300 text-sm font-medium px-4 py-3 rounded-xl shadow-xl flex items-center gap-2">
       <svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
       </svg>
-      <span id="toastMessage">Copied to clipboard!</span>
+      <span id="toastMessage">Done!</span>
     </div>
   </div>
 
   <script>
-    const form          = document.getElementById('disputeForm');
-    const generateBtn   = document.getElementById('generateBtn');
-    const btnContent    = document.getElementById('btnContent');
-    const btnLoading    = document.getElementById('btnLoading');
-    const loadingText   = document.getElementById('loadingText');
-    const letterOutput  = document.getElementById('letterOutput');
-    const copyBtn       = document.getElementById('copyBtn');
-    const downloadBtn   = document.getElementById('downloadBtn');
-    const errorPanel    = document.getElementById('errorPanel');
-    const errorMessage  = document.getElementById('errorMessage');
-    const loadingBar    = document.getElementById('loadingBar');
-    const loadingStatus = document.getElementById('loadingStatus');
-    const charCount     = document.getElementById('charCount');
-    const wordCountBadge = document.getElementById('wordCountBadge');
-    const wordCount     = document.getElementById('wordCount');
-    const placeholderOverlay = document.getElementById('placeholderOverlay');
-    const step1 = document.getElementById('step1');
-    const step2 = document.getElementById('step2');
-    const step3 = document.getElementById('step3');
+    // ──────────────────────────────────────────
+    //  🔑  PASTE YOUR GEMINI API KEY HERE
+    // ──────────────────────────────────────────
+    const API_KEY = "YOUR_GEMINI_API_KEY_HERE";
 
-    // Character Counter Fix
+    // ── API endpoint — calls Gemini directly, no backend needed ──
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+
+    // ── DOM refs ──
+    const form               = document.getElementById('disputeForm');
+    const generateBtn        = document.getElementById('generateBtn');
+    const btnContent         = document.getElementById('btnContent');
+    const btnLoading         = document.getElementById('btnLoading');
+    const letterOutput       = document.getElementById('letterOutput');
+    const copyBtn            = document.getElementById('copyBtn');
+    const downloadBtn        = document.getElementById('downloadBtn');
+    const errorPanel         = document.getElementById('errorPanel');
+    const errorMessage       = document.getElementById('errorMessage');
+    const loadingBar         = document.getElementById('loadingBar');
+    const loadingStatus      = document.getElementById('loadingStatus');
+    const wordCountBadge     = document.getElementById('wordCountBadge');
+    const wordCount          = document.getElementById('wordCount');
+    const placeholderOverlay = document.getElementById('placeholderOverlay');
+    const step1              = document.getElementById('step1');
+    const step2              = document.getElementById('step2');
+    const step3              = document.getElementById('step3');
+
+    // ── Character counter ──
     document.getElementById('description').addEventListener('input', function () {
-      charCount.textContent = this.value.length + ' chars';
-      charCount.className = this.value.length > 50
+      document.getElementById('charCount').textContent = this.value.length + ' chars';
+      document.getElementById('charCount').className = this.value.length > 50
         ? 'absolute bottom-3 right-3 text-[10px] text-indigo-500/60'
         : 'absolute bottom-3 right-3 text-[10px] text-slate-600';
     });
 
+    // ── Loading messages ──
     const loadingMessages = [
       "Analyzing your dispute details…",
       "Consulting consumer protection principles…",
@@ -466,6 +488,7 @@
     ];
 
     let loadingInterval;
+
     function startLoadingAnimation() {
       let i = 0;
       loadingStatus.textContent = loadingMessages[0];
@@ -498,98 +521,157 @@
     }
 
     function setStep(n) {
-      const steps = [step1, step2, step3];
-      steps.forEach((s, i) => {
+      [step1, step2, step3].forEach((s, i) => {
         s.classList.remove('step-active', 'step-done', 'step-pending');
-        if (i + 1 < n)      s.classList.add('step-done');
+        if      (i + 1 < n)  s.classList.add('step-done');
         else if (i + 1 === n) s.classList.add('step-active');
         else                  s.classList.add('step-pending');
       });
     }
 
     function showToast(message, isError = false) {
-      const toast = document.getElementById('toast');
+      const toast    = document.getElementById('toast');
       const toastMsg = document.getElementById('toastMessage');
       const toastDiv = toast.querySelector('div');
       toastMsg.textContent = message;
-      if (isError) {
-        toastDiv.className = 'glass border border-red-600/40 bg-red-900/20 text-red-300 text-sm font-medium px-4 py-3 rounded-xl shadow-xl flex items-center gap-2';
-      } else {
-        toastDiv.className = 'glass border border-emerald-600/40 bg-emerald-900/20 text-emerald-300 text-sm font-medium px-4 py-3 rounded-xl shadow-xl flex items-center gap-2';
-      }
+      toastDiv.className = isError
+        ? 'glass border border-red-600/40 bg-red-900/20 text-red-300 text-sm font-medium px-4 py-3 rounded-xl shadow-xl flex items-center gap-2'
+        : 'glass border border-emerald-600/40 bg-emerald-900/20 text-emerald-300 text-sm font-medium px-4 py-3 rounded-xl shadow-xl flex items-center gap-2';
       toast.classList.remove('hidden');
-      setTimeout(() => toast.classList.add('hidden'), 3000);
+      setTimeout(() => toast.classList.add('hidden'), 3500);
     }
 
     function validateForm() {
       let valid = true;
-      const companyTypeEl = document.getElementById('companyType');
-      const descEl        = document.getElementById('description');
-      const outcomeEl     = document.getElementById('desiredOutcome');
       ['companyTypeError', 'descriptionError', 'outcomeError'].forEach(id => {
         document.getElementById(id).classList.add('hidden');
       });
-      if (!companyTypeEl.value) {
+      if (!document.getElementById('companyType').value) {
         document.getElementById('companyTypeError').classList.remove('hidden');
         valid = false;
       }
-      if (descEl.value.trim().length < 50) {
+      if (document.getElementById('description').value.trim().length < 50) {
         document.getElementById('descriptionError').classList.remove('hidden');
         valid = false;
       }
-      if (outcomeEl.value.trim().length < 20) {
+      if (document.getElementById('desiredOutcome').value.trim().length < 20) {
         document.getElementById('outcomeError').classList.remove('hidden');
         valid = false;
       }
       return valid;
     }
 
+    // ── Build the system prompt ──
     function buildPrompt(companyType, description, desiredOutcome, tone) {
-      const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      const today = new Date().toLocaleDateString('en-US', {
+        year: 'numeric', month: 'long', day: 'numeric'
+      });
       const deadline = new Date();
       deadline.setDate(deadline.getDate() + 14);
-      const deadlineStr = deadline.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-
-      return `You are an expert consumer rights attorney. Draft a professional, formal dispute letter.
-      TONE: ${tone}.
-      SENDER DATE: ${today}.
-      DEADLINE DATE: ${deadlineStr}.
-      
-      REQUIREMENTS:
-      - Formal Header.
-      - Statement of Facts (Numbered).
-      - Legal Principles (Cite 2-3 consumer protection laws).
-      - Specific Demand.
-      - 14-day Deadline (${deadlineStr}).
-      - Escalation warning (CFPB, FTC, Small Claims).
-      - Formal Closing.
-
-      USER INFO:
-      Company: ${companyType}
-      Description: ${description}
-      Desired Outcome: ${desiredOutcome}
-
-      Output ONLY the letter text.`;
-    }
-
-    async function generateLetter(prompt) {
-      const response = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt })
+      const deadlineStr = deadline.toLocaleDateString('en-US', {
+        year: 'numeric', month: 'long', day: 'numeric'
       });
 
+      return `You are an expert consumer rights attorney with 20 years of experience drafting formal dispute and demand letters.
+
+Your task is to draft a professional, formal dispute letter on behalf of a consumer.
+
+TONE: ${tone}
+
+STRUCTURE THE LETTER WITH EXACTLY THESE SECTIONS:
+1. FORMAL HEADER (today's date: ${today}, recipient placeholder, subject line)
+2. OPENING STATEMENT (clear identification of the dispute)
+3. STATEMENT OF FACTS (numbered, chronological)
+4. APPLICABLE LEGAL PRINCIPLES (cite 2-3 relevant consumer protection laws or principles)
+5. SPECIFIC DEMAND (bullet points of what is required)
+6. DEADLINE (firm 14-day deadline: ${deadlineStr})
+7. ESCALATION WARNING (CFPB, FTC, BBB, state attorney general, small claims court)
+8. FORMAL CLOSING
+
+RULES:
+- Use placeholder brackets like [YOUR FULL NAME], [YOUR ADDRESS], [YOUR CITY, STATE, ZIP], [YOUR PHONE], [YOUR EMAIL] for sender info
+- Use [COMPANY NAME], [COMPANY ADDRESS] for recipient where not provided
+- Use specific numbers/dates the user provided; use brackets only where info is missing
+- Output ONLY the letter — no commentary, no preamble, no explanation outside the letter
+
+DISPUTE DETAILS:
+Company Type: ${companyType}
+What Happened: ${description}
+Desired Outcome: ${desiredOutcome}
+
+Write the complete formal dispute letter now:`;
+    }
+
+    // ── Call Gemini API directly ──
+    async function generateLetter(prompt) {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{ text: prompt }]
+          }],
+          generationConfig: {
+            temperature: 0.4,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 2048,
+          },
+          safetySettings: [
+            { category: "HARM_CATEGORY_HARASSMENT",        threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+            { category: "HARM_CATEGORY_HATE_SPEECH",       threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" }
+          ]
+        })
+      });
+
+      // Handle HTTP errors with helpful messages
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: AI service temporarily unavailable.`);
+        let errMsg = `HTTP ${response.status}`;
+        try {
+          const errData = await response.json();
+          errMsg = errData?.error?.message || errMsg;
+        } catch (_) {}
+
+        if (response.status === 400) throw new Error('Invalid request. Please check your input and try again.');
+        if (response.status === 401 || response.status === 403) throw new Error('Invalid API key. Please check your API_KEY and make sure it is active.');
+        if (response.status === 429) throw new Error('Rate limit exceeded. Please wait a moment and try again.');
+        if (response.status === 500) throw new Error('Google AI service returned an error. Please try again in a few seconds.');
+        if (response.status === 503) throw new Error('Google AI service is temporarily unavailable. Please try again shortly.');
+        throw new Error(errMsg);
       }
 
       const data = await response.json();
-      if (!data.text) throw new Error('The AI returned an empty response.');
-      return data.text;
+      const candidate = data?.candidates?.[0];
+
+      if (!candidate) {
+        throw new Error('No response received from the AI. Please try again.');
+      }
+      if (candidate.finishReason === 'SAFETY') {
+        throw new Error('Response blocked by safety filter. Please rephrase your dispute description.');
+      }
+
+      const text = candidate?.content?.parts?.[0]?.text;
+      if (!text || text.trim() === '') {
+        throw new Error('The AI returned an empty response. Please try again.');
+      }
+
+      return text.trim();
     }
 
+    // ── Form submit ──
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+
+      // Check API key is set
+      if (!API_KEY || API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
+        errorPanel.classList.remove('hidden');
+        errorMessage.textContent = 'API key is missing. Open the HTML file, find the API_KEY constant in the script, and replace "YOUR_GEMINI_API_KEY_HERE" with your actual Gemini API key from Google AI Studio.';
+        showToast('⚠️ API key not set!', true);
+        return;
+      }
+
       if (!validateForm()) {
         showToast('Please fill in all required fields.', true);
         return;
@@ -611,45 +693,58 @@
 
       try {
         const letter = await generateLetter(prompt);
+
         letterOutput.value = letter;
         letterOutput.readOnly = false;
         placeholderOverlay.style.display = 'none';
         copyBtn.disabled = false;
         downloadBtn.disabled = false;
+
         const wc = letter.split(/\s+/).filter(w => w.length > 0).length;
         wordCount.textContent = wc;
         wordCountBadge.classList.remove('hidden');
+
         setStep(3);
+
         if (window.innerWidth < 1024) {
           letterOutput.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
+
         showToast('✅ Letter generated successfully!');
+
       } catch (err) {
-        console.error('Error:', err);
+        console.error('Dispute Architect Error:', err);
         errorPanel.classList.remove('hidden');
-        errorMessage.textContent = err.message;
+        errorMessage.textContent = err.message || 'An unexpected error occurred. Please try again.';
         setStep(1);
-        showToast('Generation failed.', true);
+        showToast('Generation failed. See error panel.', true);
       } finally {
         setLoading(false);
       }
     });
 
+    // ── Copy to clipboard ──
     async function copyToClipboard() {
       const text = letterOutput.value;
       if (!text) return;
       try {
         await navigator.clipboard.writeText(text);
+        document.getElementById('copyText').textContent = 'Copied!';
+        setTimeout(() => { document.getElementById('copyText').textContent = 'Copy'; }, 2500);
         showToast('📋 Letter copied to clipboard!');
       } catch (err) {
-        showToast('📋 Copied!', true);
+        letterOutput.select();
+        document.execCommand('copy');
+        showToast('📋 Copied!');
       }
     }
 
+    // ── Download as .txt ──
     function downloadLetter() {
       const text = letterOutput.value;
       if (!text) return;
-      const filename = `Dispute_Letter_${new Date().toISOString().split('T')[0]}.txt`;
+      const companyType = document.getElementById('companyType').value || 'dispute';
+      const filename = `Dispute_Letter_${companyType.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.txt`;
       const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
       const url  = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -657,9 +752,10 @@
       link.download = filename;
       link.click();
       URL.revokeObjectURL(url);
-      showToast('💾 Letter saved!');
+      showToast('💾 Letter saved as ' + filename);
     }
 
+    // ── Update word count on edit ──
     letterOutput.addEventListener('input', function () {
       if (this.value) {
         const wc = this.value.split(/\s+/).filter(w => w.length > 0).length;
@@ -672,4 +768,3 @@
   </script>
 </body>
 </html>
-```
