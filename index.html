@@ -578,7 +578,7 @@ The AI will structure it with:
     // ──────────────────────────────────────────
     //  🔑  PASTE YOUR GEMINI API KEY HERE
     // ──────────────────────────────────────────
-    const API_KEY = "";
+    
 
     // ── API endpoint ──
     const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`;
@@ -775,30 +775,13 @@ Now draft the complete formal dispute letter:`;
     //  CORE: Call Gemini API
     // ──────────────────────────────────────────
     async function generateLetter(prompt) {
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{ text: prompt }]
-          }],
-          generationConfig: {
-            temperature: 0.4,        // Lower = more precise / formal
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 2048,
-          },
-          safetySettings: [
-            { category: "HARM_CATEGORY_HARASSMENT",        threshold: "BLOCK_MEDIUM_AND_ABOVE" },
-            { category: "HARM_CATEGORY_HATE_SPEECH",       threshold: "BLOCK_MEDIUM_AND_ABOVE" },
-            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
-            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" }
-          ]
-        })
-      });
-
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
+      const response = await const response = await fetch('/api/generate', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ prompt: systemPrompt + userPrompt })
+});
+const data = await response.json();
+const resultText = data.text;.catch(() => ({}));
         const errMsg = errData?.error?.message || `HTTP ${response.status}: ${response.statusText}`;
         throw new Error(errMsg);
       }
