@@ -314,10 +314,6 @@
             <span id="loadingText">Drafting your letter…</span>
           </span>
         </button>
-
-        <p class="text-center text-xs text-slate-600">
-          🔑 Set your <code class="text-indigo-400/80 bg-indigo-900/20 px-1 py-0.5 rounded">API_KEY</code> constant in the script before use
-        </p>
       </form>
     </div>
 
@@ -441,15 +437,32 @@
     </div>
   </div>
 
+  <!-- API Key Modal -->
+  <div id="apiModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm hidden">
+    <div class="glass rounded-2xl p-8 max-w-md w-full mx-4 border border-indigo-700/40 shadow-2xl">
+      <div class="flex justify-between items-start mb-4">
+        <h3 class="text-lg font-semibold text-white">Enter Your Google AI API Key</h3>
+        <button onclick="closeApiModal()" class="text-slate-500 hover:text-white text-xl">&times;</button>
+      </div>
+      <p class="text-sm text-slate-400 mb-6">
+        Get your key from <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-indigo-400 hover:underline">Google AI Studio</a>. It's free for limited use.
+      </p>
+      <input
+        id="apiKeyInput"
+        type="password"
+        placeholder="Paste your API key here..."
+        class="w-full bg-navy-800/60 border border-navy-600/50 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 glow-focus transition-all duration-200 mb-4"
+      />
+      <button
+        onclick="saveApiKey()"
+        class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200"
+      >
+        Save & Continue
+      </button>
+    </div>
+  </div>
+
   <script>
-    // ──────────────────────────────────────────
-    //  🔑  PASTE YOUR GEMINI API KEY HERE
-    // ──────────────────────────────────────────
-    const API_KEY = "YOUR_GEMINI_API_KEY_HERE";
-
-    // ── API endpoint — calls Gemini directly, no backend needed ──
-    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
-
     // ── DOM refs ──
     const form               = document.getElementById('disputeForm');
     const generateBtn        = document.getElementById('generateBtn');
@@ -468,6 +481,8 @@
     const step1              = document.getElementById('step1');
     const step2              = document.getElementById('step2');
     const step3              = document.getElementById('step3');
+    const apiModal           = document.getElementById('apiModal');
+    const apiKeyInput        = document.getElementById('apiKeyInput');
 
     // ── Character counter ──
     document.getElementById('description').addEventListener('input', function () {
@@ -561,6 +576,26 @@
       return valid;
     }
 
+    // ── Get API key from localStorage or prompt user ──
+    function getApiKey() {
+      return localStorage.getItem('disputeArchitectApiKey');
+    }
+
+    function saveApiKey() {
+      const key = apiKeyInput.value.trim();
+      if (!key) {
+        showToast('⚠️ Please paste your API key.', true);
+        return;
+      }
+      localStorage.setItem('disputeArchitectApiKey', key);
+      apiModal.classList.add('hidden');
+      showToast('✅ API key saved securely!');
+    }
+
+    function closeApiModal() {
+      apiModal.classList.add('hidden');
+    }
+
     // ── Build the system prompt ──
     function buildPrompt(companyType, description, desiredOutcome, tone) {
       const today = new Date().toLocaleDateString('en-US', {
@@ -604,6 +639,14 @@ Write the complete formal dispute letter now:`;
 
     // ── Call Gemini API directly ──
     async function generateLetter(prompt) {
+      const API_KEY = getApiKey();
+      if (!API_KEY) {
+        apiModal.classList.remove('hidden');
+        throw new Error('API key missing. Please paste your key.');
+      }
+
+      const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+
       const response = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -626,37 +669,22 @@ Write the complete formal dispute letter now:`;
         })
       });
 
-      // Handle HTTP errors with helpful messages
       if (!response.ok) {
         let errMsg = `HTTP ${response.status}`;
         try {
           const errData = await response.json();
           errMsg = errData?.error?.message || errMsg;
         } catch (_) {}
-
-        if (response.status === 400) throw new Error('Invalid request. Please check your input and try again.');
-        if (response.status === 401 || response.status === 403) throw new Error('Invalid API key. Please check your API_KEY and make sure it is active.');
-        if (response.status === 429) throw new Error('Rate limit exceeded. Please wait a moment and try again.');
-        if (response.status === 500) throw new Error('Google AI service returned an error. Please try again in a few seconds.');
-        if (response.status === 503) throw new Error('Google AI service is temporarily unavailable. Please try again shortly.');
         throw new Error(errMsg);
       }
 
       const data = await response.json();
       const candidate = data?.candidates?.[0];
 
-      if (!candidate) {
-        throw new Error('No response received from the AI. Please try again.');
-      }
-      if (candidate.finishReason === 'SAFETY') {
-        throw new Error('Response blocked by safety filter. Please rephrase your dispute description.');
-      }
-
+      if (!candidate) throw new Error('No response from AI.');
+      if (candidate.finishReason === 'SAFETY') throw new Error('Response blocked by safety filter.');
       const text = candidate?.content?.parts?.[0]?.text;
-      if (!text || text.trim() === '') {
-        throw new Error('The AI returned an empty response. Please try again.');
-      }
-
+      if (!text || text.trim() === '') throw new Error('Empty response from AI.');
       return text.trim();
     }
 
@@ -664,11 +692,9 @@ Write the complete formal dispute letter now:`;
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      // Check API key is set
-      if (!API_KEY || API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
-        errorPanel.classList.remove('hidden');
-        errorMessage.textContent = 'API key is missing. Open the HTML file, find the API_KEY constant in the script, and replace "YOUR_GEMINI_API_KEY_HERE" with your actual Gemini API key from Google AI Studio.';
-        showToast('⚠️ API key not set!', true);
+      if (!getApiKey()) {
+        apiModal.classList.remove('hidden');
+        showToast('⚠️ Please paste your API key first.', true);
         return;
       }
 
@@ -715,9 +741,9 @@ Write the complete formal dispute letter now:`;
       } catch (err) {
         console.error('Dispute Architect Error:', err);
         errorPanel.classList.remove('hidden');
-        errorMessage.textContent = err.message || 'An unexpected error occurred. Please try again.';
+        errorMessage.textContent = err.message || 'An unexpected error occurred.';
         setStep(1);
-        showToast('Generation failed. See error panel.', true);
+        showToast('Generation failed.', true);
       } finally {
         setLoading(false);
       }
